@@ -44,6 +44,14 @@ foreach ($events as $event) {
   // オウム返し
   //$bot->replyText($event->getReplyToken(), $event->getText());
 
+  //サービス終了の通知を返信
+  $messageStr = 'サービスを終了しました。 ';
+  $messageStr = $messageStr . "\r\n";
+  $messageStr = $messageStr . "\r\n" . 'サービスに関するお問合せは、下記アドレスまでお願い致します。';
+  $messageStr = $messageStr . "\r\n" . 'iryo@sbs-infosys.co.jp';
+  $bot->replyText($event->getReplyToken(), $messageStr);
+
+  /*
   if ($event instanceof \LINE\LINEBot\Event\MessageEvent\TextMessage) {
     //入力されたテキストを取得
     $SectionName = $event->getText();
@@ -167,6 +175,7 @@ foreach ($events as $event) {
         $bot->replyMessage($event->getReplyToken(), $builder);
     }
   }
+  */
 }
 
 // テキストを返信。引数はLINEBot、返信先、テキスト
