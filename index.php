@@ -78,9 +78,56 @@ foreach ($events as $event) {
     $messageStr = $messageStr . "\r\n" . 'ホームページ：';
     $messageStr = $messageStr . "\r\n" . 'http://www.sbs-infosys.co.jp/';
     $bot->replyText($event->getReplyToken(), $messageStr);
+    
+  } elseif($SectionName == '診療科を選択') {
+    // Carouselテンプレートメッセージを返信
+    // ダイアログの配列
+    $columnArray = array();
+    $colCnt = 0;
+    $CarouselNum = 1;
+    $jsonString = file_get_contents('https://primearch.jp/displaybd/db/departments/0000000001');
+    // 文字列を連想配列に変換
+    $obj = json_decode($jsonString, true);
+    foreach ($obj as $key => $val){
+      error_log($val["name"]);
+      //変数インクリメント
+      $colCnt++;
+      if ($colCnt == 1) {
+        //最初の列定義
+        $actionArray = array();
+      }
+      if ($colCnt <= 3) {
+        array_push($actionArray, new LINE\LINEBot\TemplateActionBuilder\MessageTemplateActionBuilder ($val["name"],$val["name"]));
+      }
+      if ($colCnt == 3) {
+        //最後の列定義
+        $column = new \LINE\LINEBot\MessageBuilder\TemplateBuilder\CarouselColumnTemplateBuilder (
+          '診療科選択' . $CarouselNum, '診療科を選択してください。', null, $actionArray);
+        // 配列に追加
+        array_push($columnArray, $column);
+        //変数初期化
+        $colCnt = 0;
+        //Carousel番号の変数インクリメント
+        $CarouselNum++;
+      }
+    }
+    //途中でLOOPを抜けた
+    if (($colCnt > 0) and ($colCnt < 3)) {
+      while($colCnt < 3) {
+        array_push($actionArray, new LINE\LINEBot\TemplateActionBuilder\MessageTemplateActionBuilder ('　','　'));
+        $colCnt++;
+      }
+      //最後の列定義
+      $column = new \LINE\LINEBot\MessageBuilder\TemplateBuilder\CarouselColumnTemplateBuilder (
+        '診療科選択' . $CarouselNum, '診療科を選択してください。', null, $actionArray);
+      // 配列に追加
+      array_push($columnArray, $column);
+    }
+    //選択メニュー表示
+    replyCarouselTemplate($bot, $event->getReplyToken(),'診療科選択', $columnArray);
 
   } else {
-
+    /*
     //入力された診療科から診療科コードを取得
     $section_id = 0;
     if ($SectionName=='内科'){
@@ -116,7 +163,7 @@ foreach ($events as $event) {
     if ($section_id > 0) {
       error_log("同じ診療科が存在した");
       // PrimeKarte APIにアクセスし診察待ち状況を取得
-
+  */
       //時間を取得
       date_default_timezone_set('Asia/Tokyo');
       $reqtime = date("His");
@@ -149,6 +196,7 @@ foreach ($events as $event) {
         }
       }
       $bot->replyText($event->getReplyToken(), $messageStr);
+    /*
     }
     //診療科が見つからない場合は、リストを返す
     if($section_id==0) {
@@ -178,6 +226,8 @@ foreach ($events as $event) {
         new \LINE\LINEBot\MessageBuilder\TemplateBuilder\ButtonTemplateBuilder ($messageTitle, '診療科を選択してください。', null, $actionArray));
         $bot->replyMessage($event->getReplyToken(), $builder);
     }
+    */
+    
   }
   
 }
